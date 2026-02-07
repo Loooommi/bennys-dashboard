@@ -766,12 +766,14 @@
                     showAlert('💾 Sauvegarde dans Google Sheets...', 'warning');
                     
                     const payload = new URLSearchParams({
+                        row: index + 2,          // 👈 ligne Google Sheets
                         date: task.date,
                         title: task.title,
                         department: task.department,
                         assignee: task.assignee,
                         status: task.status
                     });
+
                     
                     const url = `${APPS_SCRIPT_URL}?${payload.toString()}`;
                     
@@ -887,10 +889,10 @@
             saveTasks();
             displayTasks();
             updateStats();
-            
-            // Sync to sheet if configured
-            saveToSheet(tasks[index]);
+
+            saveToSheet(tasks[index], index); // 👈 index envoyé
         }
+
         
             function deleteTask(index) {
             if (!confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) return;
