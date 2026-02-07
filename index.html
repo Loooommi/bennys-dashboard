@@ -4,1086 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Benny's - Gestion des Tâches</title>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #ff0e0e8f 0%, #cc0000 100%);
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-        
-        .header .subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        
-        .status-bar {
-            padding: 15px 25px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #dc3545;
-            animation: pulse 2s infinite;
-        }
-        
-        .status-dot.connected {
-            background: #28a745;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        .last-sync {
-            font-size: 12px;
-            color: #6c757d;
-        }
-        
-        .main-content {
-            padding: 25px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            border: 2px solid #dee2e6;
-            transition: all 0.3s;
-        }
-        
-        .stat-card:active {
-            transform: scale(0.98);
-        }
-        
-        .stat-card.total {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-color: #2196f3;
-        }
-        
-        .stat-card.done {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border-color: #28a745;
-        }
-        
-        .stat-card.pending {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
-            border-color: #ffc107;
-        }
-        
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #212529;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #dee2e6;
-            background: white;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .filter-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .filter-btn.active {
-            background: #ff0e0e8f;
-            color: white;
-            border-color: #cc0000;
-        }
-        
-        .add-task-btn {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        
-        .add-task-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .tasks-section {
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            margin-bottom: 15px;
-            color: #212529;
-            font-size: 20px;
-            font-weight: 600;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #ff0e0e8f;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .section-icon {
-            font-size: 24px;
-        }
-        
-        .tasks-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .task-card {
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
-            border-radius: 15px;
-            padding: 15px;
-            transition: all 0.3s;
-        }
-        
-        .task-card:active {
-            transform: scale(0.98);
-        }
-        
-        .task-card.done {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border-color: #28a745;
-            opacity: 0.8;
-        }
-        
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .task-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #212529;
-            flex: 1;
-        }
-        
-        .task-title.done {
-            text-decoration: line-through;
-            opacity: 0.7;
-        }
-        
-        .task-actions {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .task-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.3s;
-        }
-        
-        .task-btn:active {
-            transform: scale(0.9);
-        }
-        
-        .check-btn {
-            background: #28a745;
-        }
-        
-        .uncheck-btn {
-            background: #ffc107;
-        }
-        
-        .edit-btn {
-            background: #17a2b8;
-        }
-        
-        .delete-btn {
-            background: #dc3545;
-        }
-        
-        .task-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-            color: #6c757d;
-        }
-        
-        .task-assignee {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: #e9ecef;
-            padding: 5px 10px;
-            border-radius: 8px;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-        }
-        
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            padding: 20px;
-            border-bottom: 2px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #212529;
-        }
-        
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #6c757d;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s;
-        }
-        
-        .close-btn:active {
-            transform: scale(0.9);
-            background: #f8f9fa;
-        }
-        
-        .modal-body {
-            padding: 20px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #495057;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #ff0e0e8f;
-            box-shadow: 0 0 0 3px rgba(255, 14, 14, 0.1);
-        }
-        
-        .modal-footer {
-            padding: 20px;
-            border-top: 2px solid #e9ecef;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn:active {
-            transform: scale(0.98);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #ff0e0e8f 0%, #cc0000 100%);
-            color: white;
-        }
-        
-        /* Alert */
-        .alert {
-            display: none;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-weight: 600;
-            z-index: 2000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-        
-        .alert.success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .alert.error {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .alert.warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        
-        @media (max-width: 768px) {
-            .status-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .filters {
-                flex-direction: column;
-            }
-            
-            .filter-btn {
-                width: 100%;
-            }
-            
-            .task-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .modal-footer {
-                flex-direction: column;
-            }
-        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial;background:linear-gradient(135deg,#000 0%,#1a1a1a 100%);min-height:100vh;padding:20px}
+        .container{max-width:1200px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+        .header{background:linear-gradient(135deg,#ff0e0e8f 0%,#cc0000 100%);color:#fff;padding:25px;text-align:center}
+        .header h1{font-size:28px;font-weight:700}
+        .subtitle{opacity:.9}
+        .status-bar{padding:15px 25px;background:#f8f9fa;border-bottom:2px solid #e9ecef;display:flex;justify-content:space-between}
+        .status-dot{width:10px;height:10px;border-radius:50%;background:#dc3545}
+        .status-dot.connected{background:#28a745}
+        .main-content{padding:25px}
+        .add-task-btn{width:100%;padding:15px;border:none;border-radius:10px;background:#28a745;color:#fff;font-size:16px;font-weight:600;margin-bottom:20px}
+        .tasks-list{display:flex;flex-direction:column;gap:10px}
+        .task-card{background:#f8f9fa;border:2px solid #dee2e6;border-radius:15px;padding:15px}
+        .task-card.done{background:#d4edda;border-color:#28a745;opacity:.8}
+        .task-header{display:flex;justify-content:space-between;align-items:center}
+        .task-title.done{text-decoration:line-through;opacity:.6}
+        .task-btn{border:none;border-radius:8px;padding:5px 10px;font-size:16px;cursor:pointer}
+        .check-btn{background:#28a745}
+        .uncheck-btn{background:#ffc107}
+        .edit-btn{background:#17a2b8}
+        .delete-btn{background:#dc3545}
+        .alert{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:15px 30px;border-radius:10px;font-weight:600;z-index:2000}
+        .alert.success{background:#28a745;color:#fff}
+        .alert.error{background:#dc3545;color:#fff}
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📋 Gestion des Tâches</h1>
-            <div class="subtitle">Benny's Garage</div>
-        </div>
-        
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Déconnecté</span>
-            </div>
-            <div class="last-sync" id="lastSync">Aucune sync</div>
-        </div>
-        
-        <div class="main-content">
-            <!-- Statistiques -->
-            <div class="stats-grid">
-                <div class="stat-card total">
-                    <div class="stat-value" id="statTotal">0</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat-card done">
-                    <div class="stat-value" id="statDone">0</div>
-                    <div class="stat-label">Faites</div>
-                </div>
-                <div class="stat-card pending">
-                    <div class="stat-value" id="statPending">0</div>
-                    <div class="stat-label">En attente</div>
-                </div>
-            </div>
-            
-            <!-- Bouton ajouter -->
-            <button class="add-task-btn" onclick="openAddModal()">➕ Nouvelle Tâche</button>
-            
-            <!-- Filtres -->
-            <div class="filters">
-                <button class="filter-btn active" onclick="filterTasks('all')">Toutes</button>
-                <button class="filter-btn" onclick="filterTasks('direction')">👔 Direction</button>
-                <button class="filter-btn" onclick="filterTasks('rh')">👥 RH</button>
-                <button class="filter-btn" onclick="filterTasks('ce')">🏢 CE</button>
-                <button class="filter-btn" onclick="filterTasks('done')">✅ Faites</button>
-                <button class="filter-btn" onclick="filterTasks('pending')">⏳ En attente</button>
-            </div>
-            
-            <!-- Tâches Direction -->
-            <div class="tasks-section" id="sectionDirection">
-                <div class="section-title">
-                    <span class="section-icon">👔</span>
-                    Direction
-                </div>
-                <div class="tasks-list" id="tasksDirection"></div>
-            </div>
-            
-            <!-- Tâches RH -->
-            <div class="tasks-section" id="sectionRH">
-                <div class="section-title">
-                    <span class="section-icon">👥</span>
-                    Ressources Humaines
-                </div>
-                <div class="tasks-list" id="tasksRH"></div>
-            </div>
-            
-            <!-- Tâches CE -->
-            <div class="tasks-section" id="sectionCE">
-                <div class="section-title">
-                    <span class="section-icon">🏢</span>
-                    Comité d'Entreprise
-                </div>
-                <div class="tasks-list" id="tasksCE"></div>
-            </div>
-        </div>
+
+<div class="container">
+    <div class="header">
+        <h1>📋 Gestion des Tâches</h1>
+        <div class="subtitle">Benny's Garage</div>
     </div>
-    
-    <!-- Modal Ajouter/Modifier Tâche -->
-    <div class="modal" id="taskModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="modalTitle">Nouvelle Tâche</div>
-                <button class="close-btn" onclick="closeModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Titre de la tâche</label>
-                    <input type="text" id="inputTitle" placeholder="Ex: Réunion mensuelle">
-                </div>
-                <div class="form-group">
-                    <label>Département</label>
-                    <select id="inputDepartment">
-                        <option value="direction">👔 Direction</option>
-                        <option value="rh">👥 Ressources Humaines</option>
-                        <option value="ce">🏢 Comité d'Entreprise</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Assignée à</label>
-                    <input type="text" id="inputAssignee" placeholder="Ex: Jean Dupont">
-                </div>
-                <div class="form-group">
-                    <label>Statut</label>
-                    <select id="inputStatus">
-                        <option value="pending">⏳ En attente</option>
-                        <option value="done">✅ Faite</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
-                <button class="btn btn-primary" onclick="saveTask()">Enregistrer</button>
-            </div>
+
+    <div class="status-bar">
+        <div>
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Déconnecté</span>
         </div>
+        <div id="lastSync">Aucune sync</div>
     </div>
-    
-    <!-- Alert -->
-    <div class="alert" id="alertBox"></div>
-    
-    <script>
-        // ========================================
-        // CONFIGURATION - MODIFIEZ ICI
-        // ========================================
-        
-        // URL de votre Apps Script (pour écriture)
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrJp452cyJCoBgc_fEVH0SRIX5FFWswa8C9bT7EwLH8MyJeLxa2c8Dlrh7zz5T-wWBiQ/exec';
-        
-        // URL CSV de votre Google Sheet (pour lecture)
-        // Format: https://docs.google.com/spreadsheets/d/[VOTRE_ID]/pub?gid=[GID]&single=true&output=csv
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTrgS7cT2qYdeFv57KmBFmGC2OyjK0HmqLQuIRWX-oAAGphaNoxTowsPEz8wbNstQ52zqR-iiyQ_p77/pub?gid=918495740&single=true&output=csv';
-        
-        // ========================================
-        // DONNÉES
-        // ========================================
-        
-        let tasks = [];
-        let currentFilter = 'all';
-        let editingIndex = -1;
-        let sheetConnected = false;
-        
-        // Tâches d'exemple
-        const exampleTasks = [
-            {
-                title: "Réunion mensuelle",
-                department: "direction",
-                assignee: "Jean Martin",
-                status: "pending",
-                date: "07/02/2024 10:00:00"
-            },
-            {
-                title: "Validation budget 2024",
-                department: "direction",
-                assignee: "Marie Dubois",
-                status: "done",
-                date: "07/02/2024 09:30:00"
-            },
-            {
-                title: "Recrutement mécanicien",
-                department: "rh",
-                assignee: "Sophie Laurent",
-                status: "pending",
-                date: "07/02/2024 11:00:00"
-            },
-            {
-                title: "Mise à jour contrats",
-                department: "rh",
-                assignee: "Pierre Durand",
-                status: "done",
-                date: "07/02/2024 08:45:00"
-            },
-            {
-                title: "Organisation événement",
-                department: "ce",
-                assignee: "Luc Bernard",
-                status: "pending",
-                date: "07/02/2024 14:00:00"
-            },
-            {
-                title: "Commande tickets restaurant",
-                department: "ce",
-                assignee: "Claire Moreau",
-                status: "done",
-                date: "07/02/2024 15:30:00"
-            }
-        ];
-        
-        // ========================================
-        // INITIALISATION
-        // ========================================
-        
-        window.addEventListener('load', () => {
-            const savedTasks = localStorage.getItem('bennys_tasks');
-            if (savedTasks) {
-                tasks = JSON.parse(savedTasks);
-            } else {
-                tasks = exampleTasks;
-                saveTasks();
-            }
-            
-            displayTasks();
-            updateStats();
-            
-            if (SHEET_CSV_URL && SHEET_CSV_URL !== 'COLLEZ_VOTRE_URL_CSV_ICI') {
-                connectSheet();
-            } else {
-                showAlert('⚠️ Configuration requise : Modifiez les URLs dans le code', 'warning');
-            }
-        });
-        
-        // ========================================
-        // GOOGLE SHEETS
-        // ========================================
-        
-        async function connectSheet() {
-            if (!SHEET_CSV_URL) {
-                showAlert('❌ URL CSV non configurée', 'error');
-                return;
-            }
-            
-            try {
-                const response = await fetch(SHEET_CSV_URL);
-                if (response.ok) {
-                    updateStatus(true);
-                    loadFromSheet();
-                } else {
-                    updateStatus(false);
-                }
-            } catch (error) {
-                updateStatus(false);
-                showAlert('❌ Erreur de connexion: ' + error.message, 'error');
-            }
+
+    <div class="main-content">
+        <button class="add-task-btn" onclick="openAddModal()">➕ Nouvelle tâche</button>
+        <div class="tasks-list" id="tasksList"></div>
+    </div>
+</div>
+
+<div class="alert" id="alertBox"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrJp452cyJCoBgc_fEVH0SRIX5FFWswa8C9bT7EwLH8MyJeLxa2c8Dlrh7zz5T-wWBiQ/exec';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTrgS7cT2qYdeFv57KmBFmGC2OyjK0HmqLQuIRWX-oAAGphaNoxTowsPEz8wbNstQ52zqR-iiyQ_p77/pub?gid=918495740&single=true&output=csv';
+
+let tasks = [];
+
+window.onload = () => {
+    const saved = localStorage.getItem('bennys_tasks');
+    tasks = saved ? JSON.parse(saved) : [];
+    displayTasks();
+    connectSheet();
+};
+
+async function connectSheet() {
+    try {
+        const r = await fetch(SHEET_CSV_URL);
+        if (r.ok) {
+            document.getElementById('statusDot').classList.add('connected');
+            document.getElementById('statusText').textContent = 'Connecté';
+            loadFromSheet();
         }
-        
-        async function loadFromSheet() {
-            if (!SHEET_CSV_URL) {
-                showAlert('❌ Veuillez d\'abord connecter un Google Sheet', 'error');
-                return;
-            }
-            
-            try {
-                showAlert('📥 Chargement des données...', 'warning');
-                
-                const response = await fetch(SHEET_CSV_URL);
-                const csvText = await response.text();
-                
-                const lines = csvText.split('\n').filter(line => line.trim());
-                
-                if (lines.length < 2) {
-                    showAlert('⚠️ Aucune donnée trouvée', 'warning');
-                    return;
-                }
-                
-                tasks = [];
-                const dataLines = lines.slice(1); // Skip header
-                
-                dataLines.forEach(line => {
-                    const values = parseCSVLine(line);
-                    if (values.length >= 5) {
-                        tasks.push({
-                            date: values[0],
-                            title: values[1],
-                            department: values[2],
-                            assignee: values[3],
-                            status: values[4]
-                        });
-                    }
-                });
-                
-                saveTasks();
-                displayTasks();
-                updateStats();
-                updateLastSync();
-                showAlert('✅ Données chargées avec succès!', 'success');
-                
-            } catch (error) {
-                showAlert('❌ Erreur lors du chargement: ' + error.message, 'error');
-                console.error('Erreur détaillée:', error);
-            }
-        }
-        
-        function parseCSVLine(line) {
-            const values = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    values.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            
-            values.push(current.trim());
-            return values;
-        }
-        
-        async function saveToSheet(task) {
-            if (APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'COLLEZ_VOTRE_URL_APPS_SCRIPT_ICI') {
-                try {
-                    showAlert('💾 Sauvegarde dans Google Sheets...', 'warning');
-                    
-                    const payload = new URLSearchParams({
-                        date: task.date,
-                        title: task.title,
-                        department: task.department,
-                        assignee: task.assignee,
-                        status: task.status
-                    });
-                    
-                    const url = `${APPS_SCRIPT_URL}?${payload.toString()}`;
-                    
-                    await fetch(url, {
-                        method: 'GET',
-                        mode: 'no-cors'
-                    });
-                    
-                    showAlert('✅ Données envoyées à Google Sheets!', 'success');
-                    updateLastSync();
-                    setTimeout(loadFromSheet, 1500);
-                    
-                } catch (error) {
-                    console.error('Erreur sauvegarde:', error);
-                    showAlert('⚠️ Sauvegarde locale OK. Erreur Google Sheets.', 'warning');
-                }
-            }
-        }
-        
-        // ========================================
-        // GESTION DES TÂCHES
-        // ========================================
-        
-        function saveTasks() {
-            localStorage.setItem('bennys_tasks', JSON.stringify(tasks));
-        }
-        
-        function displayTasks() {
-            const directionList = document.getElementById('tasksDirection');
-            const rhList = document.getElementById('tasksRH');
-            const ceList = document.getElementById('tasksCE');
-            
-            directionList.innerHTML = '';
-            rhList.innerHTML = '';
-            ceList.innerHTML = '';
-            
-            let filteredTasks = tasks;
-            
-            if (currentFilter === 'done') {
-                filteredTasks = tasks.filter(t => t.status === 'done');
-            } else if (currentFilter === 'pending') {
-                filteredTasks = tasks.filter(t => t.status === 'pending');
-            } else if (currentFilter !== 'all') {
-                filteredTasks = tasks.filter(t => t.department === currentFilter);
-            }
-            
-            const directionTasks = filteredTasks.filter(t => t.department === 'direction');
-            const rhTasks = filteredTasks.filter(t => t.department === 'rh');
-            const ceTasks = filteredTasks.filter(t => t.department === 'ce');
-            
-            displayTaskList(directionTasks, directionList);
-            displayTaskList(rhTasks, rhList);
-            displayTaskList(ceTasks, ceList);
-            
-            // Masquer sections vides selon le filtre
-            document.getElementById('sectionDirection').style.display = 
-                (currentFilter === 'all' || currentFilter === 'direction' || directionTasks.length > 0) ? 'block' : 'none';
-            document.getElementById('sectionRH').style.display = 
-                (currentFilter === 'all' || currentFilter === 'rh' || rhTasks.length > 0) ? 'block' : 'none';
-            document.getElementById('sectionCE').style.display = 
-                (currentFilter === 'all' || currentFilter === 'ce' || ceTasks.length > 0) ? 'block' : 'none';
-        }
-        
-        function displayTaskList(tasksList, container) {
-            if (tasksList.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div>Aucune tâche</div></div>';
-                return;
-            }
-            
-            tasksList.forEach((task, globalIndex) => {
-                const realIndex = tasks.indexOf(task);
-                const isDone = task.status === 'done';
-                
-                const taskCard = document.createElement('div');
-                taskCard.className = `task-card ${isDone ? 'done' : ''}`;
-                taskCard.innerHTML = `
-                    <div class="task-header">
-                        <div class="task-title ${isDone ? 'done' : ''}">${task.title}</div>
-                        <div class="task-actions">
-                            ${isDone ? 
-                                '<button class="task-btn uncheck-btn" onclick="toggleTask(' + realIndex + ')">↩️</button>' :
-                                '<button class="task-btn check-btn" onclick="toggleTask(' + realIndex + ')">✓</button>'
-                            }
-                            <button class="task-btn edit-btn" onclick="editTask(' + realIndex + ')">✏️</button>
-                            <button class="task-btn delete-btn" onclick="deleteTask(' + realIndex + ')">🗑️</button>
-                        </div>
-                    </div>
-                    <div class="task-info">
-                        <div class="task-assignee">
-                            👤 ${task.assignee}
-                        </div>
-                        <div>${task.date ? task.date.split(' ')[0] : ''}</div>
-                    </div>
-                `;
-                container.appendChild(taskCard);
-            });
-        }
-        
-        function filterTasks(filter) {
-            currentFilter = filter;
-            
-            // Update active button
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            displayTasks();
-        }
-        
-        function toggleTask(index) {
-            tasks[index].status = tasks[index].status === 'done' ? 'pending' : 'done';
-            saveTasks();
-            displayTasks();
-            updateStats();
-            
-            // Sync to sheet if configured
-            saveToSheet(tasks[index]);
-        }
-        
-        function deleteTask(index) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
-                tasks.splice(index, 1);
-                saveTasks();
-                displayTasks();
-                updateStats();
-                showAlert('✅ Tâche supprimée', 'success');
-            }
-        }
-        
-        function editTask(index) {
-            editingIndex = index;
-            const task = tasks[index];
-            
-            document.getElementById('modalTitle').textContent = 'Modifier la Tâche';
-            document.getElementById('inputTitle').value = task.title;
-            document.getElementById('inputDepartment').value = task.department;
-            document.getElementById('inputAssignee').value = task.assignee;
-            document.getElementById('inputStatus').value = task.status;
-            
-            document.getElementById('taskModal').classList.add('active');
-        }
-        
-        function updateStats() {
-            const total = tasks.length;
-            const done = tasks.filter(t => t.status === 'done').length;
-            const pending = total - done;
-            
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statDone').textContent = done;
-            document.getElementById('statPending').textContent = pending;
-        }
-        
-        // ========================================
-        // MODAL
-        // ========================================
-        
-        function openAddModal() {
-            editingIndex = -1;
-            document.getElementById('modalTitle').textContent = 'Nouvelle Tâche';
-            document.getElementById('inputTitle').value = '';
-            document.getElementById('inputDepartment').value = 'direction';
-            document.getElementById('inputAssignee').value = '';
-            document.getElementById('inputStatus').value = 'pending';
-            
-            document.getElementById('taskModal').classList.add('active');
-        }
-        
-        function closeModal() {
-            document.getElementById('taskModal').classList.remove('active');
-            editingIndex = -1;
-        }
-        
-        function saveTask() {
-            const title = document.getElementById('inputTitle').value.trim();
-            const department = document.getElementById('inputDepartment').value;
-            const assignee = document.getElementById('inputAssignee').value.trim();
-            const status = document.getElementById('inputStatus').value;
-            
-            if (!title) {
-                showAlert('❌ Veuillez entrer un titre', 'error');
-                return;
-            }
-            
-            if (!assignee) {
-                showAlert('❌ Veuillez entrer un nom', 'error');
-                return;
-            }
-            
-            const now = new Date();
-            const jour = String(now.getDate()).padStart(2, '0');
-            const mois = String(now.getMonth() + 1).padStart(2, '0');
-            const annee = now.getFullYear();
-            const heures = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const secondes = String(now.getSeconds()).padStart(2, '0');
-            const dateStr = `${jour}/${mois}/${annee} ${heures}:${minutes}:${secondes}`;
-            
-            const task = {
-                title: title,
-                department: department,
-                assignee: assignee,
-                status: status,
-                date: dateStr
-            };
-            
-            if (editingIndex === -1) {
-                tasks.push(task);
-                showAlert('✅ Tâche ajoutée', 'success');
-            } else {
-                tasks[editingIndex] = task;
-                showAlert('✅ Tâche modifiée', 'success');
-            }
-            
-            saveTasks();
-            displayTasks();
-            updateStats();
-            closeModal();
-            
-            // Sync to sheet if configured
-            saveToSheet(task);
-        }
-        
-        // ========================================
-        // UTILITAIRES
-        // ========================================
-        
-        function showAlert(message, type) {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.textContent = message;
-            alertBox.className = `alert ${type}`;
-            alertBox.style.display = 'block';
-            
-            setTimeout(() => {
-                alertBox.style.display = 'none';
-            }, 5000);
-        }
-        
-        function updateStatus(connected) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            
-            if (connected) {
-                dot.classList.add('connected');
-                text.textContent = 'Connecté';
-                sheetConnected = true;
-            } else {
-                dot.classList.remove('connected');
-                text.textContent = 'Déconnecté';
-                sheetConnected = false;
-            }
-        }
-        
-        function updateLastSync() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('fr-FR');
-            document.getElementById('lastSync').textContent = `Dernière sync: ${timeStr}`;
-        }
-        
-        // Close modal on outside click
-        document.getElementById('taskModal').addEventListener('click', (e) => {
-            if (e.target.id === 'taskModal') closeModal();
-        });
-    </script>
+    } catch {}
+}
+
+async function loadFromSheet() {
+    const res = await fetch(SHEET_CSV_URL);
+    const text = await res.text();
+    const lines = text.split('\n').slice(1);
+
+    tasks = lines.filter(l => l.trim()).map(l => {
+        const v = l.split(',');
+        return { date:v[0], title:v[1], department:v[2], assignee:v[3], status:v[4] };
+    });
+
+    saveTasks();
+    displayTasks();
+}
+
+function saveTasks() {
+    localStorage.setItem('bennys_tasks', JSON.stringify(tasks));
+}
+
+function displayTasks() {
+    const c = document.getElementById('tasksList');
+    c.innerHTML = '';
+    if (!tasks.length) {
+        c.innerHTML = '<p>Aucune tâche</p>';
+        return;
+    }
+
+    tasks.forEach((t,i) => {
+        c.innerHTML += `
+        <div class="task-card ${t.status==='done'?'done':''}">
+            <div class="task-header">
+                <div class="task-title ${t.status==='done'?'done':''}">${t.title}</div>
+                <div>
+                    <button class="task-btn ${t.status==='done'?'uncheck-btn':'check-btn'}" onclick="toggleTask(${i})">✓</button>
+                    <button class="task-btn delete-btn" onclick="deleteTask(${i})">🗑️</button>
+                </div>
+            </div>
+            <small>${t.assignee} – ${t.date}</small>
+        </div>`;
+    });
+}
+
+function toggleTask(i) {
+    tasks[i].status = tasks[i].status === 'done' ? 'pending' : 'done';
+    saveTasks();
+    displayTasks();
+}
+
+function deleteTask(i) {
+    if (!confirm('Supprimer cette tâche ?')) return;
+
+    fetch(APPS_SCRIPT_URL, {
+        method:'POST',
+        mode:'no-cors',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:new URLSearchParams({ action:'delete', row:i+2 })
+    });
+
+    tasks.splice(i,1);
+    saveTasks();
+    displayTasks();
+    showAlert('Tâche supprimée','success');
+}
+
+function showAlert(msg,type){
+    const a=document.getElementById('alertBox');
+    a.textContent=msg;
+    a.className='alert '+type;
+    a.style.display='block';
+    setTimeout(()=>a.style.display='none',3000);
+}
+</script>
+
 </body>
 </html>
