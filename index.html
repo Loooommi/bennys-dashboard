@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benny's - Tableau de bord</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs-container {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .tabs {
+            display: inline-flex;
+            gap: 10px;
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        tr:nth-child(even):hover {
+            background: #e9ecef;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .sort-indicator {
+            margin-left: 5px;
+            font-size: 0.8em;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs-container {
+                padding: 10px 15px;
+            }
+
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Benny's Dashboard</h1>
+            <p>Gestion complète du garage automobile</p>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs" id="tabs"></div>
+        </div>
+
+        <div class="content">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Rechercher dans le tableau...">
+                <button class="export-btn" onclick="exportToCSV()">📥 Exporter CSV</button>
+            </div>
+
+            <div id="statsContainer" class="stats-container"></div>
+            <div id="tableContainer" class="table-wrapper"></div>
+        </div>
+    </div>
+
+    <script>
+        let allData = {};
+        let currentSheet = '';
+        let currentSort = { column: -1, ascending: true };
+
+        // Charger les données du Google Sheet
+        async function loadGoogleSheetData() {
+            const SHEET_ID = '1bWeFvpHkuwGX1ux_KQ4wlP9b09c6Acm1uTHFaAWUT_4';
+            const sheets = [
+                { name: 'Employes', gid: '0' },
+                { name: 'Comptabilité', gid: '577785314' },
+                { name: 'list Recrutement', gid: '1819166726' },
+                { name: 'Calendrier', gid: '1962386330' },
+                { name: 'Partenariat', gid: '692836986' },
+                { name: 'Absence', gid: '1716737733' },
+                { name: 'Tache', gid: '1288585052' },
+                { name: 'recrutement', gid: '1450956438' },
+                { name: 'prix LTD', gid: '1943255341' },
+                { name: 'calcul', gid: '362815911' }
+            ];
+
+            const loadPromises = sheets.map(async (sheet) => {
+                try {
+                    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${sheet.gid}`;
+                    const response = await fetch(url);
+                    const csvText = await response.text();
+                    const rows = parseCSV(csvText);
+                    allData[sheet.name] = rows;
+                } catch (error) {
+                    console.error(`Erreur lors du chargement de ${sheet.name}:`, error);
+                    allData[sheet.name] = [];
+                }
+            });
+
+            await Promise.all(loadPromises);
+            initializeTabs();
+            displaySheet(Object.keys(allData)[0]);
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            
+            for (let line of lines) {
+                if (!line.trim()) continue;
+                
+                const row = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                row.push(current.trim());
+                result.push(row);
+            }
+            
+            return result;
+        }
+
+        function initializeTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            tabsContainer.innerHTML = '';
+            
+            Object.keys(allData).forEach(sheetName => {
+                const tab = document.createElement('div');
+                tab.className = 'tab';
+                tab.textContent = sheetName;
+                tab.onclick = () => displaySheet(sheetName);
+                tabsContainer.appendChild(tab);
+            });
+        }
+
+        function displaySheet(sheetName) {
+            currentSheet = sheetName;
+            currentSort = { column: -1, ascending: true };
+            
+            // Mettre à jour les onglets actifs
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.textContent === sheetName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            const data = allData[sheetName];
+            if (!data || data.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            displayStats(data, sheetName);
+            displayTable(data);
+        }
+
+        function displayStats(data, sheetName) {
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = '';
+
+            const stats = [];
+
+            if (sheetName === 'Employes') {
+                const employees = data.filter((row, idx) => idx > 2 && row.some(cell => cell && cell.trim()));
+                const totalSalary = employees.reduce((sum, row) => {
+                    const salary = parseFloat(row[0]) || 0;
+                    return sum + salary;
+                }, 0);
+
+                stats.push(
+                    { label: 'Total Employés', value: employees.length },
+                    { label: 'Salaire Total', value: totalSalary.toLocaleString('fr-FR') + ' €' }
+                );
+            } else if (sheetName === 'list Recrutement' || sheetName === 'recrutement') {
+                const candidates = data.filter((row, idx) => idx > 0 && row.some(cell => cell && cell.trim()));
+                stats.push({ label: 'Candidatures', value: candidates.length });
+            } else if (sheetName === 'Absence') {
+                const absences = data.filter((row, idx) => idx > 0 && row.some(cell => cell && cell.trim()));
+                stats.push({ label: 'Absences', value: absences.length });
+            }
+
+            stats.push({ label: 'Total Lignes', value: data.length });
+
+            stats.forEach(stat => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h3>${stat.label}</h3>
+                    <p>${stat.value}</p>
+                `;
+                statsContainer.appendChild(card);
+            });
+        }
+
+        function displayTable(data, searchTerm = '') {
+            const tableContainer = document.getElementById('tableContainer');
+            
+            if (!data || data.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            let filteredData = data;
+            if (searchTerm) {
+                filteredData = data.filter(row => 
+                    row.some(cell => 
+                        cell && cell.toString().toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                );
+            }
+
+            if (filteredData.length === 0) {
+                showEmptyState('Aucun résultat trouvé');
+                return;
+            }
+
+            const headers = filteredData[0] || [];
+            const rows = filteredData.slice(1);
+
+            let tableHTML = '<table><thead><tr>';
+            headers.forEach((header, idx) => {
+                const sortIcon = currentSort.column === idx 
+                    ? (currentSort.ascending ? '▲' : '▼') 
+                    : '';
+                tableHTML += `<th onclick="sortTable(${idx})">${header || `Colonne ${idx + 1}`}<span class="sort-indicator">${sortIcon}</span></th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            rows.forEach(row => {
+                tableHTML += '<tr>';
+                headers.forEach((_, idx) => {
+                    const cell = row[idx] || '';
+                    tableHTML += `<td>${cell}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            tableContainer.innerHTML = tableHTML;
+        }
+
+        function sortTable(columnIndex) {
+            if (currentSort.column === columnIndex) {
+                currentSort.ascending = !currentSort.ascending;
+            } else {
+                currentSort.column = columnIndex;
+                currentSort.ascending = true;
+            }
+
+            const data = [...allData[currentSheet]];
+            const headers = data[0];
+            const rows = data.slice(1);
+
+            rows.sort((a, b) => {
+                let aVal = a[columnIndex] || '';
+                let bVal = b[columnIndex] || '';
+
+                // Essayer de convertir en nombre
+                const aNum = parseFloat(aVal);
+                const bNum = parseFloat(bVal);
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return currentSort.ascending ? aNum - bNum : bNum - aNum;
+                }
+
+                // Comparaison textuelle
+                aVal = aVal.toString().toLowerCase();
+                bVal = bVal.toString().toLowerCase();
+
+                if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+                if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+                return 0;
+            });
+
+            allData[currentSheet] = [headers, ...rows];
+            displayTable(allData[currentSheet], document.getElementById('searchInput').value);
+        }
+
+        function showEmptyState(message = 'Aucune donnée disponible') {
+            const tableContainer = document.getElementById('tableContainer');
+            tableContainer.innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3>${message}</h3>
+                </div>
+            `;
+        }
+
+        function exportToCSV() {
+            const data = allData[currentSheet];
+            if (!data || data.length === 0) return;
+
+            let csv = '';
+            data.forEach(row => {
+                csv += row.map(cell => {
+                    const cellStr = (cell || '').toString();
+                    return cellStr.includes(',') ? `"${cellStr}"` : cellStr;
+                }).join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${currentSheet}.csv`;
+            link.click();
+        }
+
+        // Recherche en temps réel
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                displayTable(allData[currentSheet], e.target.value);
+            });
+
+            // Afficher le loader
+            document.getElementById('tableContainer').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement des données...</p>
+                </div>
+            `;
+
+            // Charger les données
+            loadGoogleSheetData();
+        });
+    </script>
+</body>
+</html>
